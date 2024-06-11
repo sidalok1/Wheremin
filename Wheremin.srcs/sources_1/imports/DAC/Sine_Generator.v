@@ -20,29 +20,28 @@
 
 
 module Sine_Generator (
-    input freq,     // 256hz input outputs a 1hz sin wave
+    input freq,     // From phase accumulator in clock module. Changes how fast phase register is read through
     output reg [7:0] sine  // 8-bit output representing sine value
 );
 
-    // Define a lookup table for sine values
+    // Define a phase register for sine values
     reg [7:0] sin_values [0:255];
-    reg [7:0] angle; // 8-bit input representing angle (0 to 255)
+    reg [7:0] phase; // 8-bit input representing phase (0 to 255)
 
-    // Precompute sine values and store them in the lookup table
+    // Precompute sine values and store them in the phase register
     integer i;
     initial begin
         for (i = 0; i < 256; i = i + 1) begin
-            // Calculate sine value for each angle (in radians)
+            // Calculate sine value for each phase angle
             sin_values[i] = 127 * ($sin(i * ((2 * 3.14159) / 256)) + 1);
         end
-        angle = 0;
+        phase = 0;
     end
 
-    // Output the sine value corresponding to the input angle
+    // Output the sine value corresponding to the input phase
     always @(posedge freq) begin
-        angle <= angle + 1;
-        sine <= sin_values[angle];
-        //sine <= angle;
+        phase <= phase + 1;
+        sine <= sin_values[phase];
     end
 
 endmodule

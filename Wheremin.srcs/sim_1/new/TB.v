@@ -20,14 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module TB(
-
-    );
+module TB();
     
     reg sysclk;
     wire [7:0] dac_input;
-    
-    //integer i;
     
     basys3 UUT(
         .clk(sysclk),
@@ -38,6 +34,11 @@ module TB(
     
     sysclk <= 0;
     
+    /*
+    Due to ultrasonic sensor requiring physical world interaction, testing of said module was done without testbench.
+    For the sine generator however, a 440*256 hz clock was given from the clock module to check for correct output.
+    */
+
     forever begin
         #5 sysclk = ~sysclk;
     end

@@ -25,7 +25,7 @@ module display(
     input [7:0] din, 
     output reg [3:0] anodes,
     output [6:0] segment,
-    input din_valid
+    input din_valid // While echo pulse is being recieved (width uknown) last valid measurement is kept
     );
     
     

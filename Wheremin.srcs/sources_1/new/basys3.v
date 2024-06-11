@@ -43,7 +43,7 @@ module basys3(
         .clk(clk), 
         .clk_100hz(clk_bus[1]), 
         .clk_1Mhz(clk_bus[0]),
-        .freq_mod(distance),
+        .tuning_word(distance),
         .freq(freq)
         );
 
@@ -64,7 +64,6 @@ module basys3(
     
     Sine_Generator virtual_oscillator(
         .freq(freq),
-        //.freq(clk_bus[1]),
         .sine(JC)
         );
     

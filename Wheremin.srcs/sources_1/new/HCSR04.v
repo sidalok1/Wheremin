@@ -30,16 +30,9 @@ module HCSR04(
      reg [15:0] trig_counter;
      reg [15:0] dout_buff [4:0];
      integer i;
-     reg [15:0] echo_high;
-     reg [15:0] echo_low;
-
      reg [15:0] pulse_width; 
-
-     reg [1:0] echo_prev;
-    
+     reg [1:0] echo_prev;   
      wire [15:0] avg_echo;
-     
-     //reg [7:0] min;
 
      average dout_averager(
           .data0(dout_buff[0]),
@@ -53,18 +46,15 @@ module HCSR04(
      initial begin
           trig_counter <= 0;
           echo_prev <= 0;
-          echo_high <= 0;
-          echo_low <= 0;
           dout_buff[0] <= 16'b0;
           dout_buff[1] <= 16'b0;
           dout_buff[2] <= 16'b0;
           dout_buff[3] <= 16'b0;
           dout_buff[4] <= 16'b0;
-          //min <= 7'd70;
      end
      
      always @ (posedge clk) begin
-     
+          //Read HC-SR04 doc for more information
           case (trig_counter)
                16'd0: begin
                     trig <= 0;
@@ -85,6 +75,7 @@ module HCSR04(
           endcase
 
           if (echo_prev[0]) begin
+               //increment from zero upon reaching rising edge
                if (!echo_prev[1]) begin
                     pulse_width <= 0;
                end
@@ -92,37 +83,33 @@ module HCSR04(
                     pulse_width <= pulse_width + 1;
                end
           end
+          //On falling edge
           else if (echo_prev[1]) begin
+               /*
+               When a pulse from the ultrasonic sensor is not deflected back at the sensor, a large value is registered (likely
+               due to the pulse needing to bounce off multiple surfaces to return to sensor). Practically, values over 4000, which
+               correspond to around 70cm should be considered noise, as an impractically large flat surface area would be needed to
+               reliably bounce a signal back to the module (also requiring the user to move their hand more than 70cm is not great)
+               */
                if (pulse_width < 4000) begin
+                    //Shift register for averaging over past 5 samples
                     for (i = 0; i < 4; i = i + 1) begin
                          dout_buff[i + 1] <= dout_buff[i];
                     end
                     dout_buff[0] <= (pulse_width - 12) / 58;
+                    //Multiple equations were given by HC-SR04 documentation, not all of them correct. Much trial and error was needed for this equation
                end
-               //if (dout_buff[0] < min) min <= dout_buff[0];
-               dout <= (avg_echo); // normalize values to 0-255 
+               dout <= (avg_echo);
+               //Averaging sensor values between past 5 samples (about 300 ms) strikes good balance between being robust to noise and being responsive to input
           end
-
-          /* if (echo && !echo_prev[1]) begin
-               echo_high <= trig_counter;
-          end
-
-          if (echo_prev[1] && !echo) begin
-               echo_low <= trig_counter;
-          end */
 
           echo_prev[0] <= echo;  
           echo_prev[1] <= echo_prev[0];
-          
-          
-     end
 
-     //assign pulse_width = (echo_high - 'd12);
-
-     //assign dout = (pulse_width) * 'd17;
-    //mult by 10,000
+     end     
 endmodule
 
+//Combinational circuit for average of five values.
 module average(
      input [15:0] data0, data1, data2, data3, data4,
      output [15:0] out

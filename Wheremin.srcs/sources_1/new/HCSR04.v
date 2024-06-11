@@ -24,7 +24,7 @@ module HCSR04(
     input echo,
     input clk,
     output reg trig,
-    output reg [15:0] dout
+    output reg [7:0] dout
     );
     
      reg [15:0] trig_counter;
@@ -32,13 +32,14 @@ module HCSR04(
      integer i;
      reg [15:0] echo_high;
      reg [15:0] echo_low;
-     reg echo_state;
 
      reg [15:0] pulse_width; 
 
      reg [1:0] echo_prev;
     
      wire [15:0] avg_echo;
+     
+     //reg [7:0] min;
 
      average dout_averager(
           .data0(dout_buff[0]),
@@ -59,6 +60,7 @@ module HCSR04(
           dout_buff[2] <= 16'b0;
           dout_buff[3] <= 16'b0;
           dout_buff[4] <= 16'b0;
+          //min <= 7'd70;
      end
      
      always @ (posedge clk) begin
@@ -97,7 +99,8 @@ module HCSR04(
                     end
                     dout_buff[0] <= (pulse_width - 12) / 58;
                end
-               dout <= avg_echo;
+               //if (dout_buff[0] < min) min <= dout_buff[0];
+               dout <= (avg_echo); // normalize values to 0-255 
           end
 
           /* if (echo && !echo_prev[1]) begin

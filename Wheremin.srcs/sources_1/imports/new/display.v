@@ -22,7 +22,7 @@
 
 module display(
     input disp_clk, 
-    input [15:0] din, 
+    input [7:0] din, 
     output reg [3:0] anodes,
     output [6:0] segment,
     input din_valid
